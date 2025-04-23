@@ -1,0 +1,54 @@
+// use tokio_quiche::{quiche::Connection, ConnectionParams};
+
+// fn main() {
+//     println!("Hello, world!");
+//     ConnectionParams::default()
+// }
+#[tokio::main]
+async fn main() {
+    use futures::stream::StreamExt;
+    use tokio_quiche::ConnectionParams;
+    use tokio_quiche::ServerH3Driver;
+    use tokio_quiche::http3::settings::Http3Settings;
+    use tokio_quiche::listen;
+    use tokio_quiche::metrics::DefaultMetrics;
+    use tokio_quiche::quic::SimpleConnectionIdGenerator;
+
+    let socket = tokio::net::UdpSocket::bind("127.0.0.1:4433").await.unwrap();
+    let mut listeners = listen(
+        [socket],
+        ConnectionParams::default(),
+        SimpleConnectionIdGenerator,
+        DefaultMetrics,
+    )
+    .unwrap();
+    let mut accept_stream = &mut listeners[0];
+
+    while let Some(conn) = accept_stream.next().await {
+        let (driver, mut controller) = ServerH3Driver::new(Http3Settings::default());
+        conn.unwrap().start(driver);
+
+        tokio::spawn(
+            async move {
+                let event = controller.event_receiver_mut().recv().await;
+                controller.event_receiver_mut()
+                match event{
+                    Some(event)=>{
+                        
+                    },
+                    None =>{
+                        println!("nothing");
+                    }
+                }
+            }, //     println!("Server got: {:?}", event);
+               //     if let tokio_quiche::http3::driverRequest(req) = event {
+               //         let response = http::Response::builder()
+               //             .status(200)
+               //             .body("Hello from server".into())
+               //             .unwrap();
+               //         req.respond(response).await.unwrap();
+               //     }
+               // }
+        );
+    }
+}
