@@ -17,7 +17,7 @@ use something::make_server_endpoint;
 use quinn_proto::crypto::rustls::QuicClientConfig;
 use quinn::{ClientConfig, Endpoint};
 use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
-
+use rustls::crypto::ring::default_provider;
 // fn make_server_endpoint(
 //     bind_addr: SocketAddr,
 // ) -> Result<(Endpoint, CertificateDer<'static>), Box<dyn Error + Send + Sync + 'static>> {
@@ -27,6 +27,7 @@ use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
 // }
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+    default_provider().install_default().unwrap();
     // server and client are running on the same thread asynchronously
     let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 8080);
     tokio::spawn(run_server(addr));
@@ -40,6 +41,7 @@ async fn run_server(addr: SocketAddr) {
     // accept a single connection
     let incoming_conn: quinn::Incoming = endpoint.accept().await.unwrap();
     let conn = incoming_conn.await.unwrap();
+    // conn.ope
     println!(
         "[server] connection accepted: addr={}",
         conn.remote_address()
@@ -66,6 +68,7 @@ async fn run_client(server_addr: SocketAddr) -> Result<(), Box<dyn Error + Send 
     // Dropping handles allows the corresponding objects to automatically shut down
     drop(connection);
     // Make sure the server has a chance to clean up
+    
     endpoint.wait_idle().await;
 
     Ok(())

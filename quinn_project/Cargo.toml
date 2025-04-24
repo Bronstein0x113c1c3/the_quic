@@ -17,7 +17,8 @@ path = "src/server/quinn_server.rs"
 
 [[bin]]
 name = "quinn_client"
-path = "src/server/quinn_client.rs"
+path = "src/client/quinn_client.rs"
+
 [[bin]]
 name = "main"
 path = "src/main.rs"
